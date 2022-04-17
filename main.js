@@ -13,31 +13,33 @@ const { config } = require("./config");
        port: config.port
     });
 
-
-    pool.query("CREATE DATABASE" +" "+ config.database + ";", (err, res) => {
+   
+    // create database
+    pool.query("CREATE DATABASE" +" "+ config.database + ";", (err) => {
         
         var conString = `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`
-        var pg = require('pg');
-        var client = new pg.Client(conString);
-
-
+        var client = new pool.Client(conString);
+    
         client.connect(function(err) {
-                client.query("CREATE TABLE myboktransaction(aok text)", (err, res) => {
-                    console.log(err, res);
-                    pool.end();
-                });
 
+            // create table
+            client.query("CREATE TABLE transaction(timestamp BIGINT,transaction_type VARCHAR,token VARCHAR,amount DECIMAL)", (err, res) => {
+            // copy data to table
+            var stream = client.query(copyFrom("COPY transaction (timestamp,transaction_type,token,amount) FROM STDIN CSV HEADER"));
+          
+               return new Promise(async (resolve, reject) => {
+
+                    var fileStream = fs.createReadStream('../transactions.csv')
+                    fileStream.pipe(stream);
+
+                })
+
+                    
+            });
         });
 
     });
 
 
-// pool.connect(function (err, client, done) {
-
-
-
-
-
-// })
-
-
+  
+  
