@@ -2,7 +2,7 @@ const config = {
       host: "localhost",
       user: "postgres",
       password: "password",
-      database: "mydtestaok",
+      database: "lyly",
       port: 5432
 };
 module.exports = { config };

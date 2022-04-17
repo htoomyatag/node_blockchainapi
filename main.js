@@ -15,13 +15,20 @@ const { config } = require("./config");
 
 
     pool.query("CREATE DATABASE" +" "+ config.database + ";", (err, res) => {
-        console.log(err, res);
-
-        pool.query("CREATE TABLE myboktransaction(aok text)", (err, res) => {
-            console.log(err, res);
-            pool.end();
-        });
         
+        var conString = `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`
+        var pg = require('pg');
+        var client = new pg.Client(conString);
+
+
+        client.connect(function(err) {
+                client.query("CREATE TABLE myboktransaction(aok text)", (err, res) => {
+                    console.log(err, res);
+                    pool.end();
+                });
+
+        });
+
     });
 
 
