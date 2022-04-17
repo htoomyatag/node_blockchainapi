@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "async": "^3.2.3",
+    "pg": "^8.7.3",
+    "pg-copy-streams": "^6.0.2",
+    "pgtools": "^0.3.2"
+  }
+}
