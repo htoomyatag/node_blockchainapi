@@ -11,6 +11,12 @@ global.fetch = require('node-fetch')
 const { config } = require("./config");
 
 
+
+   
+    // create database
+
+function data_ready() {
+
     var pool = new Pool({
        host: config.host,
        user: config.user,
@@ -18,40 +24,43 @@ const { config } = require("./config");
        port: config.port
     });
 
-   
-    // create database
-    // pool.query("CREATE DATABASE" +" "+ config.database + ";", (err) => {
+     pool.query("CREATE DATABASE" +" "+ config.database + ";", (err) => {
 
 
-    //      if (err) {
-    //           console.log(err.message);
-    //     } else {
+         if (err) {
+              console.log(err.message);
+        } else {
 
-    //              var conString = `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`
-    //     var client = new pool.Client(conString);
+        var conString = `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`
+        var client = new pool.Client(conString);
     
-    //     client.connect(function(err) {
+        client.connect(function(err) {
 
-    //         // create table
-    //         client.query("CREATE TABLE transaction(timestamp BIGINT,transaction_type VARCHAR,token VARCHAR,amount DECIMAL)", (err, res) => {
-    //         // copy data to table
-    //         var stream = client.query(copyFrom("COPY transaction (timestamp,transaction_type,token,amount) FROM STDIN CSV HEADER"));
+            // create table
+            client.query("CREATE TABLE transaction(timestamp BIGINT,transaction_type VARCHAR,token VARCHAR,amount DECIMAL)", (err, res) => {
+            // copy data to table
+            var stream = client.query(copyFrom("COPY transaction (timestamp,transaction_type,token,amount) FROM STDIN CSV HEADER"));
           
-    //            return new Promise(async (resolve, reject) => {
+               return new Promise(async (resolve, reject) => {
 
-    //                 var fileStream = fs.createReadStream('../transactions.csv')
-    //                 fileStream.pipe(stream);
+                    var fileStream = fs.createReadStream('../transactions.csv')
+                    fileStream.pipe(stream);
 
-    //             })
+                })
 
                     
-    //         });
-    //     });
-    //     }
+            });
+        });
+        }
         
        
 
-    // });
+    });
+
+}
+
+
+   
 
 
 
@@ -64,6 +73,7 @@ myargs = yargs.parse()
                 console.log('question2');
                 var question = "Latest portfolio value for that token in USD"
                 var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE token = "+"'"+myargs.token.toUpperCase()+"'"+"group by token) select deposit-withdrawl as portfolio, token from cte";
+                data_retrieve();
                 break;
 
             case myargs.date !== undefined && myargs.token === undefined:
@@ -72,6 +82,7 @@ myargs = yargs.parse()
                 var dt = Date.parse(myargs.date);  
                 var mydate =  dt / 1000;  
                 var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE timestamp <= "+mydate+" group by token) select deposit-withdrawl as portfolio, token from cte";
+                data_retrieve();
                 break;
 
 
@@ -81,10 +92,11 @@ myargs = yargs.parse()
                 var dt = Date.parse(myargs.date);  
                 var mydate =  dt / 1000; 
                 var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE timestamp <= "+mydate+" AND token ="+"'"+myargs.token.toUpperCase()+"'"+"group by token) select deposit-withdrawl as portfolio, token from cte";
+                data_retrieve();
                 break;
 
             case myargs._[0] === "importdb":
-               console.log('database is imported'); 
+               data_ready();
                break;
                
 
@@ -92,6 +104,7 @@ myargs = yargs.parse()
                console.log('Question1'); 
                var question = "Latest portfolio value per token in USD"
                var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction group by token) select deposit-withdrawl as portfolio, token from cte";
+               data_retrieve();
                break;
             }     
    
@@ -101,22 +114,28 @@ myargs = yargs.parse()
 
 
 
+
+
+
+
+function data_retrieve() {
+
     var pool = new Pool({
-      host: "localhost",
-      user: "postgres",
-      database: "postgres",
-      password: "password",
-      port: 5432
+       host: config.host,
+       user: config.user,
+       password: config.password,
+       database: config.database,
+       port: config.port
     });
 
 
-
-pool.connect(function (err, client, done) {
+    pool.connect(function (err, client, done) {
 
 
      client.query(myquery, (err, res) => {
             if (err) {
               console.log(err.stack);
+
             } else {
            
                    
@@ -143,6 +162,12 @@ pool.connect(function (err, client, done) {
           });
 
 })
+
+
+
+}
+
+
 
 
 
