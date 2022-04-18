@@ -11,7 +11,6 @@ global.fetch = require('node-fetch')
 const { config } = require("./config");
 
 
-
     var pool = new Pool({
        host: config.host,
        user: config.user,
@@ -56,14 +55,6 @@ const { config } = require("./config");
 
 
 
-yargs.command({
-    command: 'GetPortfolioBy',
-    handler: ()=>{
-     
-
-    }
-})
-
 myargs = yargs.parse()
 
         switch (true) {
@@ -92,13 +83,18 @@ myargs = yargs.parse()
                 var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE timestamp <= "+mydate+" AND token ="+"'"+myargs.token.toUpperCase()+"'"+"group by token) select deposit-withdrawl as portfolio, token from cte";
                 break;
 
+            case myargs._[0] === "importdb":
+               console.log('database is imported'); 
+               break;
+               
+
             default:
                console.log('Question1'); 
                var question = "Latest portfolio value per token in USD"
                var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction group by token) select deposit-withdrawl as portfolio, token from cte";
                break;
-                  
-        }
+            }     
+   
 
 
 
