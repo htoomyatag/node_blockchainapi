@@ -16,8 +16,13 @@ const { config } = require("./config");
    
     // create database
     pool.query("CREATE DATABASE" +" "+ config.database + ";", (err) => {
-        
-        var conString = `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`
+
+
+         if (err) {
+              console.log(err.message);
+        } else {
+
+                 var conString = `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`
         var client = new pool.Client(conString);
     
         client.connect(function(err) {
@@ -37,9 +42,28 @@ const { config } = require("./config");
                     
             });
         });
+        }
+        
+       
 
     });
 
 
   
   
+
+    // pool.query("CREATE DATABASE" +" "+ config.database + ";", (res,err) => {
+        
+    //    try {
+    //          if(res) {
+    //             console.log('success')
+    //          }
+                
+          
+    //    }
+
+    //    catch (err) {
+    //          console.log('err')
+    //    }
+
+    // });
