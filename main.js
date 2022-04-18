@@ -5,7 +5,11 @@ var async = require('async')
 var { Pool } = require('pg')
 const yargs = require('yargs')
 const args = require('yargs').argv;
+const cc = require('cryptocompare')
+cc.setApiKey('e65b377a2b324ba545fa4ea02f62a4b0bfdc35d7568b89d7e2425da8ff01ed17')
+global.fetch = require('node-fetch')
 const { config } = require("./config");
+
 
 
     var pool = new Pool({
@@ -52,46 +56,106 @@ const { config } = require("./config");
 
 
 
-
-
-
-
-
 yargs.command({
     command: 'GetPortfolioBy',
     handler: ()=>{
      
-        switch (true) {
-
-
-            case args.token !== undefined && args.date === undefined:
-                console.log('question2');
-                break;
-
-            case args.date !== undefined && args.token === undefined:
-                console.log('question3');
-                break;
-
-
-            case args.token !== undefined && args.date !== undefined:
-                console.log('question4');
-                break;
-
-            default:
-               console.log('question1');
-               break;
-
-      
-                        
-        }
-
-
 
     }
 })
 
+myargs = yargs.parse()
 
-yargs.parse()
+        switch (true) {
+
+
+            case myargs.token !== undefined && myargs.date === undefined:
+                console.log('question2');
+                var question = "Latest portfolio value for that token in USD"
+                var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE token = "+"'"+myargs.token.toUpperCase()+"'"+"group by token) select deposit-withdrawl as portfolio, token from cte";
+                break;
+
+            case myargs.date !== undefined && myargs.token === undefined:
+                console.log('question3');
+                var question = "Portfolio value per token in USD on that date"
+                var dt = Date.parse(myargs.date);  
+                var mydate =  dt / 1000;  
+                var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE timestamp <= "+mydate+" group by token) select deposit-withdrawl as portfolio, token from cte";
+                break;
+
+
+            case myargs.token !== undefined && myargs.date !== undefined:
+                console.log('question4');
+                var question = "Portfolio value of that token in USD on that date"
+                var dt = Date.parse(myargs.date);  
+                var mydate =  dt / 1000; 
+                var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE timestamp <= "+mydate+" AND token ="+"'"+myargs.token.toUpperCase()+"'"+"group by token) select deposit-withdrawl as portfolio, token from cte";
+                break;
+
+            default:
+               console.log('Question1'); 
+               var question = "Latest portfolio value per token in USD"
+               var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction group by token) select deposit-withdrawl as portfolio, token from cte";
+               break;
+                  
+        }
+
+
+
+
+
+
+    var pool = new Pool({
+      host: "localhost",
+      user: "postgres",
+      database: "postgres",
+      password: "password",
+      port: 5432
+    });
+
+
+
+pool.connect(function (err, client, done) {
+
+
+     client.query(myquery, (err, res) => {
+            if (err) {
+              console.log(err.stack);
+            } else {
+           
+                   
+                    var token = res.rows.map(obj => obj['token'])
+                    cc.priceMulti(token, ['USD'])
+                    .then(prices => {
+                   
+                     console.log(question);
+                        for(var j=0;j< token.length;j++) {
+                               
+                                var token_name = res.rows[j]['token']
+                                var calc = res.rows[j]['portfolio'] * prices[token_name]['USD']     
+                                console.log(token_name,calc);
+
+                            }
+                    process.exit();
+
+                    })
+                    .catch(console.error)
+
+
+
+            }
+          });
+
+})
+
+
+
+
+
+
+
+
+
 
 
 
