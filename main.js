@@ -40,11 +40,15 @@ function data_ready() {
             client.query("CREATE TABLE transaction(timestamp BIGINT,transaction_type VARCHAR,token VARCHAR,amount DECIMAL)", (err, res) => {
             // copy data to table
             var stream = client.query(copyFrom("COPY transaction (timestamp,transaction_type,token,amount) FROM STDIN CSV HEADER"));
-          
+            var count_query = "SELECT count(*) from transaction";
+
                return new Promise(async (resolve, reject) => {
 
                     var fileStream = fs.createReadStream('../transactions.csv')
                     fileStream.pipe(stream);
+                    var count_query = "SELECT count(*) from transaction";
+                    client.query(count_query).then(res => console.log("Sucessfully finish importing "+res.rows[0].count+" rows."))
+
 
                 })
 
@@ -70,14 +74,12 @@ myargs = yargs.parse()
 
 
             case myargs.token !== undefined && myargs.date === undefined:
-                console.log('question2');
                 var question = "Latest portfolio value for that token in USD"
                 var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE token = "+"'"+myargs.token.toUpperCase()+"'"+"group by token) select deposit-withdrawl as portfolio, token from cte";
                 data_retrieve();
                 break;
 
             case myargs.date !== undefined && myargs.token === undefined:
-                console.log('question3');
                 var question = "Portfolio value per token in USD on that date"
                 var dt = Date.parse(myargs.date);  
                 var mydate =  dt / 1000;  
@@ -87,7 +89,6 @@ myargs = yargs.parse()
 
 
             case myargs.token !== undefined && myargs.date !== undefined:
-                console.log('question4');
                 var question = "Portfolio value of that token in USD on that date"
                 var dt = Date.parse(myargs.date);  
                 var mydate =  dt / 1000; 
@@ -101,7 +102,6 @@ myargs = yargs.parse()
                
 
             default:
-               console.log('Question1'); 
                var question = "Latest portfolio value per token in USD"
                var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction group by token) select deposit-withdrawl as portfolio, token from cte";
                data_retrieve();
