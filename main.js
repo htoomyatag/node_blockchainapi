@@ -73,7 +73,7 @@ myargs = yargs.parse()
             case myargs.token !== undefined && myargs.date === undefined:
                 var question = "Latest portfolio value for that token in USD"
                 var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE token = "+"'"+myargs.token.toUpperCase()+"'"+"group by token) select deposit-withdrawl as portfolio, token from cte";
-                var mydate = moment();
+                var mydate =  moment() / 1000;  
                 data_retrieve();
                 break;
 
@@ -107,7 +107,7 @@ myargs = yargs.parse()
             default:
                var question = "Latest portfolio value per token in USD"
                var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction group by token) select deposit-withdrawl as portfolio, token from cte";
-               var mydate = moment();
+               var mydate =  moment() / 1000;  
                data_retrieve();
                break;
             }     
