@@ -42,7 +42,7 @@ It is also the same with Questition3's query. I have to check the given token na
 
 Add database name,user name and password in config.js file.
 
-Run *node main.js importdb* to make data ready to use for the program.
+Run ***node main.js importdb*** to make data ready to use for the program.
 
 Once successfully finish importing data, you can run
 
