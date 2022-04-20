@@ -40,7 +40,8 @@ It is also the same with Questition3's query. I have to check the given token na
 
 # How to run
 
-Add database name,user name and password in config.js file.
+Add transactions.csv file in project root folder.
+Edit database name,user name and password in config.js file.
 
 Run ***node main.js importdb*** to make data ready to use for the program.
 
