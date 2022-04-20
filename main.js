@@ -6,11 +6,11 @@ var { Pool } = require('pg')
 const yargs = require('yargs')
 const args = require('yargs').argv;
 const cc = require('cryptocompare')
-cc.setApiKey('e65b377a2b324ba545fa4ea02f62a4b0bfdc35d7568b89d7e2425da8ff01ed17')
-global.fetch = require('node-fetch')
+var apikey = 'e65b377a2b324ba545fa4ea02f62a4b0bfdc35d7568b89d7e2425da8ff01ed17'
 const { config } = require("./config");
-
-
+const request = require('request');
+let options = {json: true};
+var moment = require('moment');
 
    
     // create database
@@ -76,6 +76,7 @@ myargs = yargs.parse()
             case myargs.token !== undefined && myargs.date === undefined:
                 var question = "Latest portfolio value for that token in USD"
                 var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction WHERE token = "+"'"+myargs.token.toUpperCase()+"'"+"group by token) select deposit-withdrawl as portfolio, token from cte";
+                var mydate = moment();
                 data_retrieve();
                 break;
 
@@ -104,6 +105,7 @@ myargs = yargs.parse()
             default:
                var question = "Latest portfolio value per token in USD"
                var myquery = "with cte as(select SUM(CASE WHEN transaction_type='DEPOSIT' THEN amount ELSE 0 END) as deposit, SUM(CASE WHEN transaction_type='WITHDRAWAL' THEN amount ELSE 0 END) as withdrawl,token from transaction group by token) select deposit-withdrawl as portfolio, token from cte";
+               var mydate = moment();
                data_retrieve();
                break;
             }     
@@ -132,34 +134,38 @@ function data_retrieve() {
     pool.connect(function (err, client, done) {
 
 
-     client.query(myquery, (err, res) => {
-            if (err) {
-              console.log(err.stack);
+     client.query(myquery, (err, result) => {
+        
+                    
+                    console.log(question);
 
-            } else {
-           
+          
+                     for(var i=0;i< result.rows.length;i++) {
+
+                             let portfolio = result.rows[i]['portfolio'];
+                             let token_name = result.rows[i]['token'];
+                             var url = "https://min-api.cryptocompare.com/data/pricehistorical?fsym="+token_name+"&tsyms=USD&ts="+mydate+"&api_key="+apikey+";"
+
+
+                            request(url, options, (error, res, body) => {
+                        
+
+                            var token_in_usd = res.body[token_name]['USD']  
+                            var calc = token_in_usd * portfolio
+                            console.log(token_name,calc); 
+
+
+
+        
+                          });
                    
-                    var token = res.rows.map(obj => obj['token'])
-                    cc.priceMulti(token, ['USD'])
-                    .then(prices => {
-                   
-                     console.log(question);
-                        for(var j=0;j< token.length;j++) {
-                               
-                                var token_name = res.rows[j]['token']
-                                var calc = res.rows[j]['portfolio'] * prices[token_name]['USD']     
-                                console.log(token_name,calc);
-
-                            }
-                    process.exit();
-
-                    })
-                    .catch(console.error)
+  
 
 
 
-            }
+        }  
           });
+
 
 })
 
