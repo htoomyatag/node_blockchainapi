@@ -133,10 +133,13 @@ function data_retrieve() {
 
     pool.connect(function (err, client, done) {
 
+ if (err) {
+                         console.log("no data");
+                    } else {   
 
      client.query(myquery, (err, result) => {
         
-                    
+
                     console.log(question);
 
           
@@ -164,7 +167,9 @@ function data_retrieve() {
 
 
         }  
+        
           });
+ }
 
 
 })
