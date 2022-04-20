@@ -8,10 +8,12 @@ So I try this program to not only work but also maintainable with
 below ways.
 
 The first way
+
 I try with sqlite because it was the fastest database. 
 I use node.js filestream feature and save into sqlite database line by line.
 
 The second way
+
 I try to import .sql files into mysql database.
 
 Both ways take too long for the CSV importing process.
