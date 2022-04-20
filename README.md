@@ -52,13 +52,13 @@ Once successfully finish importing data, you can run
 
 # Technology stack
 
-node.js v17.8.0
-postgres 
-pgtools for postgres database create
-pg-copy-streams for postgres copy command
-yargs for command line arguments
-request for API
-moment for date time format
+- node.js v17.8.0
+- postgres 
+- pgtools for postgres database create
+- pg-copy-streams for postgres copy command
+- yargs for command line arguments
+- request for API
+- moment for date time format
 
 # How to improve
 
