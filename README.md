@@ -1,4 +1,4 @@
-# designs decisions
+# Designs decisions
 
 After I study the test, while downloading the (977.3 MB CSV files)
 the first decision comes to my mind is
@@ -41,7 +41,8 @@ It is also the same with Questition3's query. I have to check the given token na
 # How to run
 
 Add database name,user name and password in config.js file.
-Run node main.js importdb to make data ready to use for the program.
+
+Run *node main.js importdb* to make data ready to use for the program.
 
 Once successfully finish importing data, you can run
 
