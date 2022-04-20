@@ -49,7 +49,7 @@ Edit database name,user name and password in config.js file.
 
 Run **node main.js importdb** to 
 
-make data ready to use for the program.
+make data ready to use for the program.Data importing will only took 1min.
 
 Once successfully finish importing data, you can run
 
@@ -57,6 +57,8 @@ Once successfully finish importing data, you can run
 - main.js --token=BTC
 - main.js --date=2018-03-14
 - main.js --date=2018-03-14 --token=BTC
+
+all tasks can return results in 5 to 10 secs.
 
 # Technology stack
 
