@@ -12,30 +12,27 @@ const request = require('request');
 let options = {json: true};
 var moment = require('moment');
 
-   
-    // create database
 
-function data_ready() {
-
-    var pool = new Pool({
+    pool = new Pool({
        host: config.host,
        user: config.user,
        password: config.password,
        port: config.port
     });
+   
+// create database
+function data_ready() {
+
 
      pool.query("CREATE DATABASE" +" "+ config.database + ";", (err) => {
 
-
-         if (err) {
-              console.log(err.message);
-        } else {
-
+ 
+        console.log("Please wait data is importing....");
+   
         var conString = `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`
         var client = new pool.Client(conString);
     
         client.connect(function(err) {
-
             // create table
             client.query("CREATE TABLE transaction(timestamp BIGINT,transaction_type VARCHAR,token VARCHAR,amount DECIMAL)", (err, res) => {
             // copy data to table
@@ -50,15 +47,15 @@ function data_ready() {
                     client.query(count_query).then(res => console.log("Sucessfully finish importing "+res.rows[0].count+" rows."))
 
 
+
+
                 })
-
-                    
+    
             });
-        });
-        }
-        
-       
 
+        });       
+        
+    
     });
 
 }
@@ -98,6 +95,11 @@ myargs = yargs.parse()
                 break;
 
             case myargs._[0] === "importdb":
+
+               var conString = `postgres://${config.user}:${config.password}@${config.host}:${config.port}`
+               var client = new pool.Client(conString);
+               // client.query("TRUNCATE TABLE transaction");
+               // client.query("DROP DATABASE IF EXISTS "+config.database+";");
                data_ready();
                break;
                
@@ -134,7 +136,7 @@ function data_retrieve() {
     pool.connect(function (err, client, done) {
 
  if (err) {
-                         console.log("no data");
+                         console.log("Please run 'main.js importdb' command first");
                     } else {   
 
      client.query(myquery, (err, result) => {
@@ -156,19 +158,20 @@ function data_retrieve() {
                             var token_in_usd = res.body[token_name]['USD']  
                             var calc = token_in_usd * portfolio
                             console.log(token_name,calc); 
-
+                       
 
 
         
                           });
                    
-  
+   
 
 
 
-        }  
-        
+        }      
+   
           });
+
  }
 
 
@@ -177,7 +180,6 @@ function data_retrieve() {
 
 
 }
-
 
 
 
